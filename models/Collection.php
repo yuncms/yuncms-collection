@@ -8,15 +8,18 @@
 namespace yuncms\collection\models;
 
 use Yii;
+use yii\behaviors\BlameableBehavior;
 use yii\db\ActiveRecord;
 use yii\behaviors\TimestampBehavior;
 use yuncms\user\models\User;
 
 /**
- * This is the model class for table "attentions".
+ * This is the model class for table "collections".
  *
  * @property integer $user_id
- * @property string $follow_id
+ * @property integer $model_id
+ * @property string $model_class
+ * @property string $subject
  * @property integer $created_at
  * @property integer $updated_at
  *
@@ -37,7 +40,14 @@ class Collection extends ActiveRecord
      */
     public function behaviors()
     {
-        return [TimestampBehavior::className()];
+        return [
+            TimestampBehavior::className(),
+            [
+                'class' => BlameableBehavior::className(),
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => 'user_id',
+                ],
+            ]];
     }
 
     /**
@@ -46,28 +56,9 @@ class Collection extends ActiveRecord
     public function rules()
     {
         return [
-            [['user_id', 'model_id', 'model'], 'required'],
-            [['model', 'subject'], 'filter', 'filter' => 'trim'],
+            [['model_id'], 'required'],
+            [['subject'], 'filter', 'filter' => 'trim'],
         ];
-    }
-
-    /**
-     *
-     * @param string $model Name of model
-     * @return integer|false Id corresponding model or false if matches not found
-     */
-    public static function getNameByModel($model)
-    {
-        if (null !== $models = Yii::$app->getModule('collection')->models) {
-            foreach ($models as $key => $value) {
-                if (is_string($value) && $value == $model) {
-                    return $key;
-                } else if ((is_array($value) && isset($value['model'])) && $value['model'] == $model) {
-                    return $key;
-                }
-            }
-        }
-        return false;
     }
 
     /**

@@ -22,14 +22,14 @@ class M171114060438Create_collection_table extends Migration
             'id' => $this->primaryKey(),
             'user_id' => $this->integer()->unsigned()->notNull(),
             'model_id' => $this->integer()->notNull(),
-            'model' => $this->string()->notNull(),
+            'model_class' => $this->string()->notNull(),
             'subject' => $this->string(),
             'created_at' => $this->integer()->unsigned()->notNull(),
             'updated_at' => $this->integer()->unsigned()->notNull(),
         ], $tableOptions);
 
         $this->addForeignKey('{{%collections_fk_1}}', '{{%collections}}', 'user_id', '{{%user}}', 'id', 'CASCADE', 'RESTRICT');
-        $this->createIndex('collections_index', '{{%collections}}', ['model_id', 'model'], false);
+        $this->createIndex('collections_index', '{{%collections}}', ['model_id', 'model_class'], false);
     }
 
     public function safeDown()
