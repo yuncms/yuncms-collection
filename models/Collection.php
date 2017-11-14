@@ -4,6 +4,7 @@
  * @copyright Copyright (c) 2012 TintSoft Technology Co. Ltd.
  * @license http://www.tintsoft.com/license/
  */
+
 namespace yuncms\collection\models;
 
 use Yii;
@@ -75,6 +76,22 @@ class Collection extends ActiveRecord
     public function getUser()
     {
         return $this->hasOne(User::className(), ['id' => 'user_id']);
+    }
+
+    /**
+     * 是否收藏
+     * @param string $model
+     * @param integer $modelId
+     * @param integer $user_id
+     * @return bool
+     */
+    public static function isCollected($model, $modelId, $user_id = null)
+    {
+        return static::find()->where([
+            'user_id' => $user_id ? $user_id : Yii::$app->user->getId(),
+            'model' => $model,
+            'model_id' => $modelId
+        ])->exists();
     }
 
     public static function create($attribute)
