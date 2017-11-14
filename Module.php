@@ -30,7 +30,6 @@ class Module extends \yii\base\Module
     public function init()
     {
         parent::init();
-        parent::init();
         if (!isset($this->models)) {
             throw new InvalidConfigException('models not configurated');
         }
