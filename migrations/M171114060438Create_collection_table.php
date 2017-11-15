@@ -19,17 +19,18 @@ class M171114060438Create_collection_table extends Migration
          * 用户收藏表
          */
         $this->createTable('{{%collections}}', [
-            'id' => $this->primaryKey(),
-            'user_id' => $this->integer()->unsigned()->notNull(),
-            'model_id' => $this->integer()->notNull(),
-            'model_class' => $this->string()->notNull(),
-            'subject' => $this->string(),
-            'created_at' => $this->integer()->unsigned()->notNull(),
-            'updated_at' => $this->integer()->unsigned()->notNull(),
+            'id' => $this->primaryKey()->unsigned()->comment('ID'),
+            'user_id' => $this->integer()->unsigned()->notNull()->comment('User Id'),
+            'model_id' => $this->integer()->notNull()->comment('Model Id'),
+            'model_class' => $this->string()->notNull()->comment('Model Class'),
+            'subject' => $this->string()->comment('Subject'),
+            'created_at' => $this->integer()->unsigned()->notNull()->comment('Created At'),
+            'updated_at' => $this->integer()->unsigned()->notNull()->comment('Updated At'),
         ], $tableOptions);
 
+        $this->createIndex('collections_index', '{{%collections}}', ['user_id', 'model_id', 'model_class'], true);
         $this->addForeignKey('{{%collections_fk_1}}', '{{%collections}}', 'user_id', '{{%user}}', 'id', 'CASCADE', 'RESTRICT');
-        $this->createIndex('collections_index', '{{%collections}}', ['model_id', 'model_class'], false);
+
     }
 
     public function safeDown()
