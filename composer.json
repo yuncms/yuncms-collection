@@ -26,8 +26,8 @@
   },
   "extra": {
     "yuncms": {
-      "name": "collection",
-      "i18n": {
+      "id": "collection",
+      "translate": {
         "class": "yii\\i18n\\PhpMessageSource",
         "sourceLanguage": "en-US",
         "basePath": "@yuncms/collection/messages"
