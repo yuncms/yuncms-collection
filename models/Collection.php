@@ -85,10 +85,16 @@ class Collection extends ActiveRecord
         ])->exists();
     }
 
-    public static function create($attribute)
+    /**
+     * 快速创建对象
+     * @param array $attribute
+     * @param boolean $runValidation
+     * @return bool|static
+     */
+    public static function create($attribute, $runValidation = true)
     {
         $model = new static ($attribute);
-        if ($model->save()) {
+        if ($model->save($runValidation)) {
             return $model;
         }
         return false;
