@@ -88,7 +88,7 @@ class CollectionController extends Controller
         }
 
         /*不能多次收藏*/
-        $userCollect = Collection::findOne(['user_id' => Yii::$app->user->id, 'model' => get_class($source), 'model_id' => $modelId]);
+        $userCollect = Collection::findOne(['user_id' => Yii::$app->user->id, 'model_class' => get_class($source), 'model_id' => $modelId]);
         if ($userCollect) {
             $userCollect->delete();
             if ($model == 'user') {

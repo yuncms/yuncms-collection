@@ -80,7 +80,7 @@ class Collection extends ActiveRecord
     {
         return static::find()->where([
             'user_id' => $user_id ? $user_id : Yii::$app->user->getId(),
-            'model' => $model,
+            'model_class' => $model,
             'model_id' => $modelId
         ])->exists();
     }
