@@ -8,9 +8,12 @@
 namespace yuncms\collection\models;
 
 use Yii;
+use yii\base\InvalidConfigException;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yuncms\db\ActiveRecord;
+use yuncms\notifications\contracts\NotificationInterface;
+use yuncms\notifications\NotificationTrait;
 use yuncms\user\models\User;
 
 /**
@@ -26,14 +29,32 @@ use yuncms\user\models\User;
  *
  * @property User $user
  */
-class Collection extends ActiveRecord
+class Collection extends ActiveRecord implements NotificationInterface
 {
+    use NotificationTrait;
+
     /**
      * @inheritdoc
      */
     public static function tableName()
     {
         return '{{%collections}}';
+    }
+
+    /**
+     * 是否收藏
+     * @param string $model
+     * @param integer $modelId
+     * @param integer $user_id
+     * @return bool
+     */
+    public static function isCollected($model, $modelId, $user_id = null)
+    {
+        return static::find()->where([
+            'user_id' => $user_id ? $user_id : Yii::$app->user->getId(),
+            'model_class' => $model,
+            'model_id' => $modelId
+        ])->exists();
     }
 
     /**
@@ -78,11 +99,18 @@ class Collection extends ActiveRecord
         return $this->hasOne($this->model_class, ['id' => 'model_id']);
     }
 
-
+    /**
+     * @param bool $insert
+     * @param array $changedAttributes
+     */
     public function afterSave($insert, $changedAttributes)
     {
         if ($insert) {
             $this->source->updateCountersAsync(['collections' => 1]);
+            try {
+                Yii::$app->notification->send($this->source->user, $this);
+            } catch (InvalidConfigException $e) {
+            }
         }
         return parent::afterSave($insert, $changedAttributes);
     }
@@ -94,21 +122,5 @@ class Collection extends ActiveRecord
     {
         $this->source->updateCountersAsync(['collections' => -1]);
         parent::afterDelete();
-    }
-
-    /**
-     * 是否收藏
-     * @param string $model
-     * @param integer $modelId
-     * @param integer $user_id
-     * @return bool
-     */
-    public static function isCollected($model, $modelId, $user_id = null)
-    {
-        return static::find()->where([
-            'user_id' => $user_id ? $user_id : Yii::$app->user->getId(),
-            'model_class' => $model,
-            'model_id' => $modelId
-        ])->exists();
     }
 }
