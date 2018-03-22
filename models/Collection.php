@@ -112,7 +112,7 @@ class Collection extends ActiveRecord implements NotificationInterface
             } catch (InvalidConfigException $e) {
             }
         }
-        return parent::afterSave($insert, $changedAttributes);
+        parent::afterSave($insert, $changedAttributes);
     }
 
     /**
