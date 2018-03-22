@@ -78,18 +78,13 @@ class Collection extends ActiveRecord
         return $this->hasOne($this->model_class, ['id' => 'model_id']);
     }
 
-    /**
-     * 更新源模型计数器
-     * @param bool $insert
-     * @return bool
-     */
-    public function beforeSave($insert)
+
+    public function afterSave($insert, $changedAttributes)
     {
-        if (!parent::beforeSave($insert)) {
-            return false;
+        if ($insert) {
+            $this->source->updateCountersAsync(['collections' => 1]);
         }
-        $this->source->updateCountersAsync(['collections' => 1]);
-        return true;
+        return parent::afterSave($insert, $changedAttributes);
     }
 
     /**
