@@ -9,8 +9,8 @@ namespace yuncms\collection\models;
 
 use Yii;
 use yii\behaviors\BlameableBehavior;
-use yii\db\ActiveRecord;
 use yii\behaviors\TimestampBehavior;
+use yuncms\db\ActiveRecord;
 use yuncms\user\models\User;
 
 /**
@@ -22,6 +22,7 @@ use yuncms\user\models\User;
  * @property string $subject
  * @property integer $created_at
  * @property integer $updated_at
+ * @property ActiveRecord $source
  *
  * @property User $user
  */
@@ -41,9 +42,9 @@ class Collection extends ActiveRecord
     public function behaviors()
     {
         return [
-            TimestampBehavior::className(),
+            TimestampBehavior::class,
             [
-                'class' => BlameableBehavior::className(),
+                'class' => BlameableBehavior::class,
                 'attributes' => [
                     ActiveRecord::EVENT_BEFORE_INSERT => 'user_id',
                 ],
@@ -66,7 +67,38 @@ class Collection extends ActiveRecord
      */
     public function getUser()
     {
-        return $this->hasOne(User::className(), ['id' => 'user_id']);
+        return $this->hasOne(User::class, ['id' => 'user_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getSource()
+    {
+        return $this->hasOne($this->model_class, ['id' => 'model_id']);
+    }
+
+    /**
+     * 更新源模型计数器
+     * @param bool $insert
+     * @return bool
+     */
+    public function beforeSave($insert)
+    {
+        if (!parent::beforeSave($insert)) {
+            return false;
+        }
+        $this->source->updateCountersAsync(['collections' => 1]);
+        return true;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function afterDelete()
+    {
+        $this->source->updateCountersAsync(['collections' => -1]);
+        parent::afterDelete();
     }
 
     /**
@@ -83,20 +115,5 @@ class Collection extends ActiveRecord
             'model_class' => $model,
             'model_id' => $modelId
         ])->exists();
-    }
-
-    /**
-     * 快速创建对象
-     * @param array $attributes
-     * @param boolean $runValidation
-     * @return bool|static
-     */
-    public static function create($attributes, $runValidation = true)
-    {
-        $model = new static ($attributes);
-        if ($model->save($runValidation)) {
-            return $model;
-        }
-        return false;
     }
 }
